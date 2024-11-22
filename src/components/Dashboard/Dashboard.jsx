@@ -1,17 +1,21 @@
 import React from 'react'
 import { Link, Outlet } from 'react-router-dom'
+import Footer from '../Footer/Footer'
+import Header from '../Header/Header'
 
 const Dashboard = () => {
    return (
       <div className="flex">
          {/* Sidebar */}
-         <aside className="w-[250px] min-h-screen bg-sky-300">
+         <aside className="w-[250px] min-h-screen bg-gray-50">
+            {/* logo */}
             <div className="border-b-2 p-2 border-purple-400">
                <Link to="/">
                   <h1 className="text-xl font-semibold">E-Commerce App</h1>
                </Link>
             </div>
-            <div className="flex pl-3 flex-col gap-3">
+            {/* sidebar nav */}
+            <div className="flex pl-3 flex-col gap-3"> 
                <Link to="addProduct">Add Product</Link>
                <Link to="blogPost">Blog Post</Link>
                <Link to="collection">Collection</Link>
@@ -19,9 +23,13 @@ const Dashboard = () => {
             </div>
          </aside>
 
-         {/* Main Content Area for Nested Routes */}
-         <main className="flex-1 p-4">
-            <Outlet /> {/* Renders the nested route component */}
+         {/*  Nested Routes */}
+         <main className='flex-1'> 
+            <Header />
+            <div className='  bg-slate-200 h-screen'>
+            <Outlet />  
+            </div>
+            <Footer />
          </main>
       </div>
    )
