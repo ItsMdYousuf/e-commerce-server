@@ -15,7 +15,8 @@ const Dashboard = () => {
                </Link>
             </div>
             {/* sidebar nav */}
-            <div className="flex pl-3 flex-col gap-3"> 
+            <div className="flex pl-3 flex-col gap-3">  
+               <Link to="/dashboard">Dashboard</Link>
                <Link to="addProduct">Add Product</Link>
                <Link to="blogPost">Blog Post</Link>
                <Link to="collection">Collection</Link>
@@ -26,8 +27,9 @@ const Dashboard = () => {
          {/*  Nested Routes */}
          <main className='flex-1'> 
             <Header />
-            <div className='  bg-slate-200 h-screen'>
-            <Outlet />  
+            <div className='bg-slate-100 h-screen'>
+                 
+               <Outlet />  
             </div>
             <Footer />
          </main>

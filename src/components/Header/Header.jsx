@@ -11,7 +11,7 @@ const Header = () => {
       <div className='flex items-center'>
         {/* Search bar */}
         <div>
-          <Input className="border-[1px] pl-8 rounded-md px-[5px] py-[3px]" />
+          <Input placeholder="ctrl + k" className="border-[1px] pl-8 rounded-md px-[5px] py-[3px]" />
         </div>
         
         {/* Header menus */}
@@ -25,7 +25,7 @@ const Header = () => {
             </div>
           
         {/* Avatar */}
-            <div className='hover:bg-gray-100 select-none w-34 rounded-md px-3 py-2'>
+            <div className='transition-all cursor-pointer duration-150 ease-in-out hover:bg-gray-100 select-none w-34 rounded-md px-3 py-2'>
             <div className=' flex  gap-3 items-center'>
               <CgProfile className='text-2xl' />
               <h2 className='text-sm font-bold'>Md Yousuf</h2>
