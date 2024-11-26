@@ -4,7 +4,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import DashboardHome from './components/Dashboard/DashboardHome'; // Default Dashboard Content
 import Hero from './components/Hero';
 import Product from './components/Product/Product';
-
+import Slider from './components/Slider';
 function App() {
   return (
    
@@ -16,6 +16,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />}>
           {/* Default Content */}
           <Route index element={<DashboardHome />} />
+          <Route path="slider" element={<Slider />} />
           <Route path="addProduct" element={<Product />} />
           <Route path="blogPost" element={<p>Blog Post</p>} />
           <Route path="collection" element={<p>Collection Post</p>} />

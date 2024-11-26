@@ -7,6 +7,10 @@ const StatusGraph = ({ subTitle, upOrDown, totalNumber, percentNumber, yearlyCou
     return trend === "up" ? "bg-green-100 border-green-500" : "bg-red-100 border-red-500";
   };
 
+  const getTextColor = (trendText) => {
+    return trendText === "up" ? "text-green-700" : "text-red-700";
+  }
+
   return (
     <div className="border-[1.4px] rounded-lg bg-white p-4">
       {/* Subtitle */}
@@ -26,7 +30,7 @@ const StatusGraph = ({ subTitle, upOrDown, totalNumber, percentNumber, yearlyCou
       </div>
 
       {/* Yearly Count */}
-      <p className="text-sm mt-5">You made an extra {yearlyCount} this year</p>
+      <p className="text-sm mt-5">You made an extra <span className={`font-semibold ${getTextColor(upOrDown)}`}>{yearlyCount}</span> this year</p>
     </div>
   );
 };

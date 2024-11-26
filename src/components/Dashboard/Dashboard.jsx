@@ -17,6 +17,7 @@ const Dashboard = () => {
             {/* sidebar nav */}
             <div className="flex pl-3 flex-col gap-3">  
                <Link to="/dashboard">Dashboard</Link>
+               <Link to="slider">Add Slider</Link>
                <Link to="addProduct">Add Product</Link>
                <Link to="blogPost">Blog Post</Link>
                <Link to="collection">Collection</Link>
