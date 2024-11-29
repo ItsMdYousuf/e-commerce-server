@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import Button from "./Button";
-import InputField from "./InputField";
+import InputField from "./Input/InputField";
 const Slider = () => {
   const [sliderFormData, setSliderFormData] = useState({
     statusName: "",
@@ -32,6 +32,7 @@ const Slider = () => {
       <form onSubmit={handleSubmit} className="mt-5">
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5">
           <InputField
+            labelName="Student Name"
             name="statusName"
             value={sliderFormData.statusName}
             onChange={handleSliderChange}
@@ -39,6 +40,7 @@ const Slider = () => {
             placeholder="Product Status Name"
           />
           <InputField
+            labelName="Sub Title Name"
             name="subTitle"
             value={sliderFormData.subTitle}
             onChange={handleSliderChange}
@@ -46,6 +48,7 @@ const Slider = () => {
             placeholder="Product sub title"
           />
           <InputField
+            labelName="Product Title"
             name="title"
             value={sliderFormData.title}
             onChange={handleSliderChange}
@@ -53,6 +56,7 @@ const Slider = () => {
             placeholder="Product title"
           />
           <InputField
+            labelName="Button Name"
             name="buttonName"
             value={sliderFormData.buttonName}
             onChange={handleSliderChange}
@@ -60,6 +64,7 @@ const Slider = () => {
             placeholder="Product Button name"
           />
           <InputField
+            labelName="button url"
             name="buttonURL"
             value={sliderFormData.buttonURL}
             onChange={handleSliderChange}
@@ -67,6 +72,7 @@ const Slider = () => {
             placeholder="Product Button url"
           />
           <InputField
+            labelName="Product URL"
             name="imageURL"
             value={sliderFormData.imageURL}
             onChange={handleSliderChange}
