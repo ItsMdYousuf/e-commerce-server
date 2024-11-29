@@ -32,6 +32,15 @@ const Product = () => {
     <div className="p-4">
       <div>
         <h2>Product Page</h2>
+        {/* Product preview */}
+        <div className="flex w-full items-center justify-center">
+          <div className="w-[14rem] bg-slate-300">
+            {/* img */}
+            <div className="h-52 w-full bg-slate-600"></div>
+            <h2>{ProductFormData.productTitle}</h2>
+            <div>${ProductFormData.productAmount}</div>
+          </div>
+        </div>
       </div>
       <div className="mt-5">
         <form onSubmit={handleProductSubmit}>
