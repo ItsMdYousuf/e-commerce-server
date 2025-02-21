@@ -64,7 +64,7 @@ const Dashboard = () => {
           </button>
           {isSidebarOpen && (
             <Link to="/">
-              <h1 className="text-xl font-semibold">E-Commerce App</h1>
+              <h1 className="text-md font-semibold">E-Commerce App</h1>
             </Link>
           )}
         </div>
