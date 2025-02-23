@@ -64,7 +64,7 @@ const Dashboard = () => {
           </button>
           {isSidebarOpen && (
             <Link to="/">
-              <h1 className="text-xl font-semibold">E-Commerce App</h1>
+              <h1 className="text-md font-semibold">E-Commerce App</h1>
             </Link>
           )}
         </div>
@@ -98,7 +98,7 @@ const Dashboard = () => {
       <main className="flex-1">
         {/* Header */}
         <Header />
-        <div className="h-screen bg-slate-100">
+        <div className="min-h-screen bg-slate-100">
           <Outlet />
         </div>
         <Footer />

@@ -2,85 +2,105 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import Button from "./Button";
 import InputField from "./Input/InputField";
+
 const Slider = () => {
   const [sliderFormData, setSliderFormData] = useState({
-    statusName: "",
-    subTitle: "",
     title: "",
-    buttonName: "",
-    buttonURL: "",
-    imageURL: "",
+    image: null,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSliderChange = (e) => {
-    const { name, value } = e.target;
-    setSliderFormData({
-      ...sliderFormData,
-      [name]: value,
-    });
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && !file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    setSliderFormData((prev) => ({ ...prev, image: file }));
   };
 
-  const handleSubmit = (e) => {
+  const handleTextChange = (e) => {
+    const { name, value } = e.target;
+    setSliderFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success("Successfully post slider!");
-    console.log("submit: ", sliderFormData);
+    setIsSubmitting(true);
+
+    if (!sliderFormData.image) {
+      toast.error("Please select an image file");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", sliderFormData.title);
+    formData.append("sliderImage", sliderFormData.image);
+
+    try {
+      const response = await fetch("http://localhost:5000/sliders", {
+        method: "POST",
+        body: formData,
+        // Headers are automatically set by browser for FormData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      toast.success("Slider uploaded successfully!");
+      console.log("Upload response:", data);
+
+      // Reset form after successful submission
+      setSliderFormData({ title: "", image: null });
+      document.querySelector('input[type="file"]').value = ""; // Clear file input
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error(error.message || "Failed to upload slider");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="p-4">
-      <h2 className="font-semibold">Slider Add</h2>
-      <form onSubmit={handleSubmit} className="mt-5">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5">
+      <h2 className="mb-4 text-lg font-semibold">Add Slider Image</h2>
+      <form onSubmit={handleSubmit} className="max-w-2xl">
+        <div className="space-y-4">
           <InputField
-            labelName="Student Name"
-            name="statusName"
-            value={sliderFormData.statusName}
-            onChange={handleSliderChange}
-            type="text"
-            placeholder="Product Status Name"
-          />
-          <InputField
-            labelName="Sub Title Name"
-            name="subTitle"
-            value={sliderFormData.subTitle}
-            onChange={handleSliderChange}
-            type="text"
-            placeholder="Product sub title"
-          />
-          <InputField
-            labelName="Product Title"
+            labelName="Slider Title"
             name="title"
             value={sliderFormData.title}
-            onChange={handleSliderChange}
+            onChange={handleTextChange}
             type="text"
-            placeholder="Product title"
+            placeholder="Enter slider title"
+            required
           />
-          <InputField
-            labelName="Button Name"
-            name="buttonName"
-            value={sliderFormData.buttonName}
-            onChange={handleSliderChange}
-            type="text"
-            placeholder="Product Button name"
-          />
-          <InputField
-            labelName="button url"
-            name="buttonURL"
-            value={sliderFormData.buttonURL}
-            onChange={handleSliderChange}
-            type="text"
-            placeholder="Product Button url"
-          />
-          <InputField
-            labelName="Product URL"
-            name="imageURL"
-            value={sliderFormData.imageURL}
-            onChange={handleSliderChange}
-            type="text"
-            placeholder="Product image url"
-          />
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Slider Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+              required
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="mt-4 w-full sm:w-auto"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Uploading..." : "Upload Slider"}
+          </Button>
         </div>
-        <Button className="mt-3" children="submit" />
       </form>
     </div>
   );
