@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-
 const Product = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
