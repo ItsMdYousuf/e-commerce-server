@@ -48,6 +48,7 @@ const Dashboard = () => {
         { name: "Manage Products", path: "/dashboard/products/manageProducts" },
       ],
     },
+
     { name: "Category", icon: <TbCategory2 />, path: "/dashboard/category" },
     { name: "Blog Post", icon: <RiBloggerLine />, path: "/dashboard/blogPost" },
     {
