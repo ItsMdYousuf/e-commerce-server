@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 
+import CategoryManager from "./components/Category/CategoryManager";
 import Dashboard from "./components/Dashboard/Dashboard";
 import DashboardHome from "./components/Dashboard/DashboardHome"; // Default Dashboard Content
 import Hero from "./components/Hero";
@@ -20,7 +21,7 @@ function App() {
         <Route path="products" element={<p>Products page.</p>} />
         <Route path="products/addNewProduct" element={<Product />} />
         <Route path="products/manageProducts" element={<ManageProducts />} />
-        <Route path="category" element={<p>Category page.</p>} />
+        <Route path="category" element={<CategoryManager />} />
         <Route path="blogPost" element={<p>Blog Post</p>} />
         <Route path="collection" element={<p>Collection Post</p>} />
         <Route path="message" element={<p>Message Post</p>} />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FiEdit, FiEye, FiPlus, FiSearch, FiTrash } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import { serverURL } from "../../SeerverDepen";
+import { ServerURL } from "../../SeerverDepen";
 
 const ManageProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,7 +11,7 @@ const ManageProducts = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 10;
   const [products, setProducts] = useState([]);
-  const productsData = serverURL + "/products";
+  const productsData = ServerURL + "/products";
 
   useEffect(() => {
     fetch(productsData)
@@ -213,7 +213,7 @@ const ManageProducts = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <img
-                          src={serverURL + product.image}
+                          src={ServerURL + product.image}
                           alt={product.productTitle}
                           className="mr-4 h-10 w-10 rounded-md object-cover"
                         />
