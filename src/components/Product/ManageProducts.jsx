@@ -8,34 +8,88 @@ const ManageProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [categoriesData, setCategoriesData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 10;
   const [products, setProducts] = useState([]);
   const productsData = ServerURL + "/products";
 
   useEffect(() => {
-    fetch(productsData)
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.log(err));
-  }, [productsData]);
+    fetchProducts();
+    // eslint-disable-next-line
+  }, []);
 
-  const categories = [
-    "All",
-    "Electronics",
-    "Fashion",
-    "Home & Kitchen",
-    "Beauty",
-  ];
-  const statusOptions = ["All", "Published", "Draft", "Archived"];
-
-  const handleDelete = (_id) => {
-    setProducts(products.filter((product) => product._id !== _id));
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch(productsData);
+      const data = await res.json();
+      setProducts(data);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    }
   };
 
-  const handleBulkAction = (action) => {
-    console.log(`Bulk ${action} for:`, selectedProducts);
-    setSelectedProducts([]);
+  // Fetch categories from the API
+  useEffect(() => {
+    fetch(ServerURL + "/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        setCategoriesData(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching categories:", err);
+      });
+  }, []);
+
+  // Static status options (can be adjusted as needed)
+  const statusOptions = ["All", "Published", "Draft", "Archived"];
+
+  // Delete a single product via API call
+  const handleDelete = async (_id) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        const response = await fetch(`${productsData}/${_id}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          // Update local state
+          setProducts(products.filter((product) => product._id !== _id));
+        } else {
+          console.error("Failed to delete product");
+        }
+      } catch (error) {
+        console.error("Deletion error:", error);
+      }
+    }
+  };
+
+  // Handle bulk actions; for delete, send multiple DELETE requests
+  const handleBulkAction = async (action) => {
+    if (action === "delete") {
+      if (
+        window.confirm("Are you sure you want to delete the selected products?")
+      ) {
+        try {
+          await Promise.all(
+            selectedProducts.map((id) =>
+              fetch(`${productsData}/${id}`, { method: "DELETE" }),
+            ),
+          );
+          setProducts(
+            products.filter(
+              (product) => !selectedProducts.includes(product._id),
+            ),
+          );
+          setSelectedProducts([]);
+        } catch (error) {
+          console.error("Bulk deletion error:", error);
+        }
+      }
+    } else {
+      console.log(`Bulk ${action} for:`, selectedProducts);
+      // Handle other bulk actions (e.g., publish, archive) here
+      setSelectedProducts([]);
+    }
   };
 
   const toggleSelectAll = (e) => {
@@ -47,11 +101,9 @@ const ManageProducts = () => {
   };
 
   const filteredProducts = products.filter((product) => {
-    // Use API field names and ensure text comparisons are in lower case
     const title = product.productTitle.toLowerCase();
     const sku = product.sku.toLowerCase();
     const category = product.productCategory.toLowerCase();
-    // Assume a default status if not provided
     const status = product.status ? product.status.toLowerCase() : "published";
 
     const matchesSearch =
@@ -102,14 +154,21 @@ const ManageProducts = () => {
               />
             </div>
 
+            {/* Category Filter using categoriesData from API */}
             <select
               className="rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
-              {categories.map((cat) => (
-                <option key={cat} value={cat.toLowerCase()}>
-                  {cat}
+              <option value="all">All</option>
+              {categoriesData.map((cat) => (
+                // Adjust the property names based on your API response.
+                // For example, if cat is an object with a "name" property:
+                <option
+                  key={cat._id || cat.id || cat.name}
+                  value={cat.name.toLowerCase()}
+                >
+                  {cat.name}
                 </option>
               ))}
             </select>
@@ -186,7 +245,6 @@ const ManageProducts = () => {
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {currentProducts.map((product) => {
-                // Use default status if missing
                 const productStatus = product.status || "published";
                 return (
                   <tr key={product._id} className="hover:bg-gray-50">
@@ -251,12 +309,18 @@ const ManageProducts = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-4">
-                        <button className="text-blue-600 hover:text-blue-800">
+                        <Link
+                          to={`/dashboard/products/manageProducts/${product._id}`}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
                           <FiEye size={18} />
-                        </button>
-                        <button className="text-green-600 hover:text-green-800">
+                        </Link>
+                        <Link
+                          to={`/products/edit/${product._id}`}
+                          className="text-green-600 hover:text-green-800"
+                        >
                           <FiEdit size={18} />
-                        </button>
+                        </Link>
                         <button
                           className="text-red-600 hover:text-red-800"
                           onClick={() => handleDelete(product._id)}
