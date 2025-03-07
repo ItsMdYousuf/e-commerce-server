@@ -1,3 +1,4 @@
+import DashboardGraphCart from "./DashboardGraphCart";
 import StatusGraph from "./StatusGraph";
 
 const DashboardHome = () => {
@@ -33,6 +34,7 @@ const DashboardHome = () => {
           upOrDown="down"
         />
       </div>
+      <DashboardGraphCart />
     </div>
   );
 };

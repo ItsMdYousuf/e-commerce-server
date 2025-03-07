@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const Product = () => {
+  const quillRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [productFormData, setProductFormData] = useState({
     productTitle: "",
     productAmount: "",
@@ -68,13 +70,20 @@ const Product = () => {
     },
   ];
 
-  const categories = [
-    "Electronics",
-    "Fashion",
-    "Home & Kitchen",
-    "Beauty",
-    "Sports",
-  ];
+  // const categories = [
+  //   "Electronics",
+  //   "Fashion",
+  //   "Home & Kitchen",
+  //   "Beauty",
+  //   "Sports",
+  // ];
+
+  useEffect(() => {
+    fetch("http://localhost:5000/categories")
+      .then((res) => res.json())
+      .then((data) => setCategories(data))
+      .catch((error) => console.error("Error fetching categories:", error));
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -300,8 +309,10 @@ const Product = () => {
                 )}
               </div> */}
 
-              <div className="quill-editor mb-4">
+              <div className="quill-editor mb-20">
                 <ReactQuill
+                  className="h-32"
+                  ref={quillRef}
                   theme="snow"
                   value={productFormData.productDescription}
                   onChange={(value) =>
@@ -407,9 +418,9 @@ const Product = () => {
                 required
               >
                 <option value="">Select Category</option>
-                {categories.map((category, index) => (
-                  <option key={index} value={category}>
-                    {category}
+                {categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
                   </option>
                 ))}
               </select>
