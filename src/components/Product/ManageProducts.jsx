@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { FiEdit, FiEye, FiPlus, FiSearch, FiTrash } from "react-icons/fi";
+import {
+  FiCopy,
+  FiEdit,
+  FiEye,
+  FiPlus,
+  FiSearch,
+  FiTrash,
+} from "react-icons/fi";
 import { Link } from "react-router-dom";
-import { ServerURL } from "../../SeerverDepen";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { LocalhostAPI } from "../../LocalhostAPI";
 
 const ManageProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,7 +21,7 @@ const ManageProducts = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 10;
   const [products, setProducts] = useState([]);
-  const productsData = ServerURL + "/products";
+  const productsData = LocalhostAPI + "/products";
 
   useEffect(() => {
     fetchProducts();
@@ -31,7 +40,7 @@ const ManageProducts = () => {
 
   // Fetch categories from the API
   useEffect(() => {
-    fetch(ServerURL + "/categories")
+    fetch(LocalhostAPI + "/categories")
       .then((res) => res.json())
       .then((data) => {
         setCategoriesData(data);
@@ -123,12 +132,24 @@ const ManageProducts = () => {
     indexOfLastProduct,
   );
 
+  // Updated handleCopySKU accepts sku as an argument
+  const handleCopySKU = (sku) => {
+    if (sku) {
+      navigator.clipboard
+        .writeText(sku)
+        .then(() => toast.success("SKU copied to clipboard!"))
+        .catch(() => toast.error("Failed to copy SKU"));
+    } else {
+      toast.error("No SKU to copy");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="mb-6 flex flex-col items-start justify-between md:flex-row md:items-center">
-          <h1 className="mb-4 text-2xl font-bold text-gray-800 md:mb-0">
+          <h1 className="mb-4 text-xl font-bold text-gray-800 md:mb-0 md:text-2xl">
             Manage Products
           </h1>
           <Link
@@ -162,8 +183,6 @@ const ManageProducts = () => {
             >
               <option value="all">All</option>
               {categoriesData.map((cat) => (
-                // Adjust the property names based on your API response.
-                // For example, if cat is an object with a "name" property:
                 <option
                   key={cat._id || cat.id || cat.name}
                   value={cat.name.toLowerCase()}
@@ -210,7 +229,7 @@ const ManageProducts = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   <input
                     type="checkbox"
                     onChange={toggleSelectAll}
@@ -220,25 +239,25 @@ const ManageProducts = () => {
                     }
                   />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   Product
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   SKU
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   Stock
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   Actions
                 </th>
               </tr>
@@ -271,7 +290,7 @@ const ManageProducts = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <img
-                          src={ServerURL + product.image}
+                          src={LocalhostAPI + product.image}
                           alt={product.productTitle}
                           className="mr-4 h-10 w-10 rounded-md object-cover"
                         />
@@ -280,7 +299,21 @@ const ManageProducts = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">{product.sku}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        <span>{product.sku}</span>
+                        <button
+                          onClick={() => handleCopySKU(product.sku)}
+                          title="Copy SKU"
+                          className="focus:outline-none"
+                        >
+                          <FiCopy
+                            size={16}
+                            className="text-gray-500 hover:text-gray-700"
+                          />
+                        </button>
+                      </div>
+                    </td>
                     <td className="px-6 py-4">${product.productAmount}</td>
                     <td className="px-6 py-4">
                       <span
@@ -365,6 +398,8 @@ const ManageProducts = () => {
           </div>
         </div>
       </div>
+      {/* Toast container for notifications */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

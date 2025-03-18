@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
+import { LocalhostAPI } from "../../LocalhostAPI";
 const ProductView = () => {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/products/${productId}`)
+    fetch(`${LocalhostAPI}/products/${productId}`)
       .then((res) => res.json())
       .then((data) => {
         // If variants is a string, try to parse it into an array.
@@ -30,10 +30,7 @@ const ProductView = () => {
       });
   }, [productId]);
 
-  if (!product)
-    return (
-      <div className="py-10 text-center">Loading or product not found...</div>
-    );
+  if (!product) return <div className="py-10 text-center">Loading...</div>;
 
   const handleVariantChange = (variant) => {
     setSelectedVariant(variant);
@@ -45,9 +42,9 @@ const ProductView = () => {
         {/* Product Image */}
         <div className="flex justify-center">
           <img
-            src={`http://localhost:5000${product.image}`}
+            src={`${LocalhostAPI}${product.image}`}
             alt={product.productTitle}
-            className="w-full max-w-md rounded-lg shadow-lg"
+            className="w-full max-w-md rounded-lg object-cover shadow-lg"
           />
         </div>
 
@@ -79,16 +76,6 @@ const ProductView = () => {
               </div>
             </div>
           )}
-
-          {/* Add to Cart and Buy Now Buttons */}
-          <div className="flex gap-4">
-            <button className="rounded-lg bg-blue-500 px-6 py-3 text-white transition hover:bg-blue-600">
-              Add to Cart
-            </button>
-            <button className="rounded-lg bg-green-500 px-6 py-3 text-white transition hover:bg-green-600">
-              Buy Now
-            </button>
-          </div>
 
           {/* Product Description */}
           <div className="prose">

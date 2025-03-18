@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ServerURL } from "../../SeerverDepen";
+import { LocalhostAPI } from "../../LocalhostAPI";
 
 const SingleBlog = () => {
   const { postId } = useParams();
@@ -8,7 +8,7 @@ const SingleBlog = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`${ServerURL}/products/${postId}`)
+    fetch(`${LocalhostAPI}/products/${postId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Post not found");
         return res.json();

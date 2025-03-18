@@ -1,0 +1,1 @@
+export const LocalhostAPI = "https://ecommerce-backend-sand-eight.vercel.app" || 'http://localhost:5000';

@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { LocalhostAPI } from "../../LocalhostAPI";
 const CategoryManager = () => {
   const [categories, setCategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -20,7 +21,7 @@ const CategoryManager = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/categories");
+      const response = await axios.get(`${LocalhostAPI}/categories`);
       setCategories(response.data);
     } catch (err) {
       setError("Failed to load categories");
@@ -39,13 +40,11 @@ const CategoryManager = () => {
 
     try {
       if (editData) {
-        await axios.put(
-          `http://localhost:5000/categories/${editData._id}`,
-          data,
-          { headers: { "Content-Type": "multipart/form-data" } },
-        );
+        await axios.put(`${LocalhostAPI}/categories/${editData._id}`, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       } else {
-        await axios.post("http://localhost:5000/categories", data, {
+        await axios.post(`${LocalhostAPI}/categories`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
@@ -66,7 +65,7 @@ const CategoryManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
-        await axios.delete(`http://localhost:5000/categories/${id}`);
+        await axios.delete(`${LocalhostAPI}/categories/${id}`);
         fetchCategories();
       } catch (err) {
         setError("Deletion failed");
@@ -183,7 +182,7 @@ const CategoryManager = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full rounded-md border px-3 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-md border px-3 py-2 capitalize focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
@@ -198,7 +197,7 @@ const CategoryManager = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, slug: e.target.value })
                   }
-                  className="w-full rounded-md border px-3 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-md border px-3 py-2 lowercase focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
