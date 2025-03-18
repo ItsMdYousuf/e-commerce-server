@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ServerURL } from "../../SeerverDepen";
+import { LocalhostAPI } from "../../LocalhostAPI";
 
 const EditProduct = () => {
   const { productId } = useParams();
@@ -20,7 +20,7 @@ const EditProduct = () => {
   // Fetch the product details when the component mounts
   useEffect(() => {
     axios
-      .get(`${ServerURL}/products/${productId}`)
+      .get(`${LocalhostAPI}/products/${productId}`)
       .then((response) => {
         if (response.data && response.data.data) {
           setProduct(response.data.data);
@@ -44,7 +44,7 @@ const EditProduct = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .put(`${ServerURL}/products/${productId}`, product)
+      .put(`${LocalhostAPI}/products/${productId}`, product)
       .then((response) => {
         // Optionally, check the response for success
         navigate("/dashboard/products/manageProducts");

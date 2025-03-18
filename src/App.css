@@ -1,1 +1,4 @@
- 
+.apexcharts-title-text,
+.apexcharts-text.apexcharts-yaxis-title-text {
+  display: none !important;
+}

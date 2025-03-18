@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-
+import { LocalhostAPI } from "../../LocalhostAPI";
 const Product = () => {
   const quillRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
+
   const [productFormData, setProductFormData] = useState({
     productTitle: "",
     productAmount: "",
@@ -70,16 +71,8 @@ const Product = () => {
     },
   ];
 
-  // const categories = [
-  //   "Electronics",
-  //   "Fashion",
-  //   "Home & Kitchen",
-  //   "Beauty",
-  //   "Sports",
-  // ];
-
   useEffect(() => {
-    fetch("http://localhost:5000/categories")
+    fetch(`${LocalhostAPI}/categories`)
       .then((res) => res.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
@@ -119,14 +112,6 @@ const Product = () => {
     });
   };
 
-  const applyTemplate = (template) => {
-    setProductFormData({
-      ...productFormData,
-      productDescription: template.content,
-    });
-    setShowTemplates(false);
-  };
-
   const handleProductSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -150,7 +135,7 @@ const Product = () => {
     if (imageFile) formData.append("productImage", imageFile);
 
     try {
-      const response = await fetch("http://localhost:5000/products", {
+      const response = await fetch(`${LocalhostAPI}/products`, {
         method: "POST",
         body: formData,
       });
@@ -283,31 +268,6 @@ const Product = () => {
               <label className="mb-1 block text-sm font-medium">
                 Description
               </label>
-              {/* <div className="mb-2">
-                <button
-                  type="button"
-                  onClick={() => setShowTemplates(!showTemplates)}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  {showTemplates ? "Hide Templates" : "Use Template"}
-                </button>
-                {showTemplates && (
-                  <div className="mt-2 space-y-2">
-                    {descriptionTemplates.map((template, index) => (
-                      <div
-                        key={index}
-                        className="cursor-pointer rounded border p-2 hover:bg-gray-50"
-                        onClick={() => applyTemplate(template)}
-                      >
-                        <div className="font-medium">{template.name}</div>
-                        <div className="line-clamp-2 text-sm text-gray-500">
-                          {template.content}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div> */}
 
               <div className="quill-editor mb-20">
                 <ReactQuill

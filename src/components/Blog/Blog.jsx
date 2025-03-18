@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ServerURL } from "../../SeerverDepen";
+import { LocalhostAPI } from "../../LocalhostAPI";
 
 const Blog = () => {
   const [blog, setBlog] = useState([]);
 
   useEffect(() => {
-    fetch(ServerURL + "/products")
+    fetch(LocalhostAPI + "/products")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch");
         return res.json();

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { LocalhostAPI } from "../LocalhostAPI";
 import Button from "./Button";
 import InputField from "./Input/InputField";
 
@@ -39,7 +40,7 @@ const Slider = () => {
     formData.append("sliderImage", sliderFormData.image);
 
     try {
-      const response = await fetch("http://localhost:5000/sliders", {
+      const response = await fetch(`${LocalhostAPI}/sliders`, {
         method: "POST",
         body: formData,
         // Headers are automatically set by browser for FormData

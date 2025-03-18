@@ -1,7 +1,7 @@
 import "apexcharts/dist/apexcharts.css";
 import React, { useState } from "react";
 import ReactApexChart from "react-apexcharts";
-
+import "../../App.css";
 const DashboardGraphCart = () => {
   const [options, setOptions] = useState({
     chart: {
