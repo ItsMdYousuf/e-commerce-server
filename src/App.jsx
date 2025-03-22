@@ -6,6 +6,7 @@ import CategoryManager from "./components/Category/CategoryManager";
 import Dashboard from "./components/Dashboard/Dashboard";
 import DashboardHome from "./components/Dashboard/DashboardHome"; // Default Dashboard Content
 import Hero from "./components/Hero";
+import Order from "./components/Order/Order";
 import EditProduct from "./components/Product/EditProduct";
 import ManageProducts from "./components/Product/ManageProducts";
 import Product from "./components/Product/Product";
@@ -32,6 +33,7 @@ function App() {
         <Route path="products/manageProducts" element={<ManageProducts />} />
         <Route path="products/edit/:productId" element={<EditProduct />} />
 
+        <Route path="order" element={<Order />} />
         <Route path="category" element={<CategoryManager />} />
         <Route path="blogPost" element={<Blog />} />
         <Route path="blogPost/:postId" element={<SingleBlog />} />

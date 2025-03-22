@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { BsCollection } from "react-icons/bs";
+import { CiCircleList } from "react-icons/ci";
 import { FiChevronDown, FiChevronUp, FiMenu } from "react-icons/fi";
 import { MdOutlineSpaceDashboard } from "react-icons/md";
 import {
@@ -49,6 +50,7 @@ const Dashboard = () => {
       ],
     },
 
+    { name: "Order", icon: <CiCircleList />, path: "/dashboard/order" },
     { name: "Category", icon: <TbCategory2 />, path: "/dashboard/category" },
     { name: "Blog Post", icon: <RiBloggerLine />, path: "/dashboard/blogPost" },
     {
