@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { LocalhostAPI } from "../LocalhostAPI";
 
 const Slider = () => {
   const [title, setTitle] = useState("");
@@ -18,7 +19,7 @@ const Slider = () => {
 
   const fetchSliders = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/sliders");
+      const res = await axios.get(`${LocalhostAPI}sliders`);
       setSliders(res.data);
     } catch (error) {
       toast.error("Failed to fetch sliders");
@@ -43,7 +44,7 @@ const Slider = () => {
     formData.append("title", title);
 
     try {
-      await axios.post("http://localhost:5000/sliders", formData);
+      await axios.post(`${LocalhostAPI}sliders`, formData);
       toast.success("Slider uploaded successfully!");
       setTitle("");
       setSliderImage(null);
@@ -58,7 +59,7 @@ const Slider = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/sliders/${id}`);
+      await axios.delete(`${LocalhostAPI}sliders/${id}`);
       toast.success("Slider deleted successfully!");
       setDeleteId(null);
       fetchSliders();
@@ -181,7 +182,7 @@ const Slider = () => {
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <img
-                      src={`http://localhost:5000${slider.image}`}
+                      src={`${LocalhostAPI}${slider.image}`}
                       alt={slider.title}
                       className="h-48 w-full object-cover"
                     />
