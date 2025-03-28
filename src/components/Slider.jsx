@@ -1,5 +1,4 @@
 import axios from "axios";
-import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,7 +17,6 @@ const Slider = () => {
     fetchSliders();
   }, []);
 
-  // Cleanup preview URL on unmount or when preview changes
   useEffect(() => {
     return () => {
       if (preview) {
@@ -39,7 +37,6 @@ const Slider = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Revoke previous URL if exists to avoid memory leaks
       if (preview) {
         URL.revokeObjectURL(preview);
       }
@@ -63,7 +60,6 @@ const Slider = () => {
       setTitle("");
       setSliderImage(null);
       setPreview("");
-      // Clear the file input using ref
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -86,29 +82,15 @@ const Slider = () => {
     }
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-    exit: { opacity: 0, scale: 0.8 },
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-7xl">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 text-4xl font-bold text-gray-800"
-        >
+        <h1 className="mb-8 text-4xl font-bold text-gray-800">
           Slider Management
-        </motion.h1>
+        </h1>
 
         {/* Upload Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mb-12 rounded-xl bg-white p-6 shadow-lg"
-        >
+        <div className="mb-12 rounded-xl bg-white p-6 shadow-lg">
           <h2 className="mb-6 text-2xl font-semibold text-gray-700">
             Upload New Slider
           </h2>
@@ -171,89 +153,70 @@ const Slider = () => {
               )}
             </button>
           </form>
-        </motion.div>
+        </div>
 
         {/* Existing Sliders */}
         <h3 className="mb-6 text-2xl font-semibold text-gray-700">
           Existing Sliders
         </h3>
-        <AnimatePresence>
-          {sliders.length === 0 ? (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center text-gray-400"
-            >
-              No sliders found
-            </motion.p>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {sliders.map((slider) => (
-                <motion.div
-                  key={slider._id}
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <img
-                    src={`${LocalhostAPI}${slider.image}`}
-                    alt={slider.title}
-                    className="h-48 w-full object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                    <h4 className="truncate text-lg font-medium">
-                      {slider.title}
-                    </h4>
-                  </div>
-                  <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button
-                      onClick={() => setDeleteId(slider._id)}
-                      className="rounded-lg bg-red-500/90 p-2 text-white transition hover:bg-red-600"
-                    >
-                      <TrashIcon />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Delete Confirmation Modal */}
-        <AnimatePresence>
-          {deleteId && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-            >
-              <div className="m-4 rounded-xl bg-white p-6 shadow-lg">
-                <h3 className="mb-4 text-lg font-semibold">Confirm Delete</h3>
-                <p className="mb-6 text-gray-600">
-                  Are you sure you want to delete this slider?
-                </p>
-                <div className="flex justify-end gap-3">
+        {sliders.length === 0 ? (
+          <p className="text-center text-gray-400">No sliders found</p>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {sliders.map((slider) => (
+              <div
+                key={slider._id}
+                className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <img
+                  src={`${LocalhostAPI}${slider.image}`}
+                  alt={slider.title}
+                  className="h-48 w-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                  <h4 className="truncate text-lg font-medium">
+                    {slider.title}
+                  </h4>
+                </div>
+                <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                   <button
-                    onClick={() => setDeleteId(null)}
-                    className="rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100"
+                    onClick={() => setDeleteId(slider._id)}
+                    className="rounded-lg bg-red-500/90 p-2 text-white transition hover:bg-red-600"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => handleDelete(deleteId)}
-                    className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                  >
-                    Delete
+                    <TrashIcon />
                   </button>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            ))}
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="m-4 rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 text-lg font-semibold">Confirm Delete</h3>
+              <p className="mb-6 text-gray-600">
+                Are you sure you want to delete this slider?
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setDeleteId(null)}
+                  className="rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDelete(deleteId)}
+                  className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <ToastContainer
