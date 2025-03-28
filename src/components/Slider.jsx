@@ -1,6 +1,6 @@
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { LocalhostAPI } from "../LocalhostAPI";
@@ -12,14 +12,24 @@ const Slider = () => {
   const [preview, setPreview] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchSliders();
   }, []);
 
+  // Cleanup preview URL on unmount or when preview changes
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
   const fetchSliders = async () => {
     try {
-      const res = await axios.get(`${LocalhostAPI}sliders`);
+      const res = await axios.get(`${LocalhostAPI}/sliders`);
       setSliders(res.data);
     } catch (error) {
       toast.error("Failed to fetch sliders");
@@ -29,6 +39,10 @@ const Slider = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Revoke previous URL if exists to avoid memory leaks
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
       setSliderImage(file);
       setPreview(URL.createObjectURL(file));
     }
@@ -44,22 +58,26 @@ const Slider = () => {
     formData.append("title", title);
 
     try {
-      await axios.post(`${LocalhostAPI}sliders`, formData);
+      await axios.post(`${LocalhostAPI}/sliders`, formData);
       toast.success("Slider uploaded successfully!");
       setTitle("");
       setSliderImage(null);
       setPreview("");
-      document.getElementById("fileInput").value = "";
+      // Clear the file input using ref
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       await fetchSliders();
     } catch (error) {
       toast.error("Upload failed");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${LocalhostAPI}sliders/${id}`);
+      await axios.delete(`${LocalhostAPI}/sliders/${id}`);
       toast.success("Slider deleted successfully!");
       setDeleteId(null);
       fetchSliders();
@@ -116,7 +134,7 @@ const Slider = () => {
                 </label>
                 <div className="relative flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 p-6 transition hover:border-blue-400">
                   <input
-                    id="fileInput"
+                    ref={fileInputRef}
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
@@ -170,40 +188,36 @@ const Slider = () => {
             </motion.p>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              <AnimatePresence>
-                {sliders.map((slider) => (
-                  <motion.div
-                    key={slider._id}
-                    variants={cardVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <img
-                      src={`${LocalhostAPI}${slider.image}`}
-                      alt={slider.title}
-                      className="h-48 w-full object-cover"
-                    />
-
-                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                      <h4 className="truncate text-lg font-medium">
-                        {slider.title}
-                      </h4>
-                    </div>
-
-                    <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                      <button
-                        onClick={() => setDeleteId(slider._id)}
-                        className="rounded-lg bg-red-500/90 p-2 text-white transition hover:bg-red-600"
-                      >
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              {sliders.map((slider) => (
+                <motion.div
+                  key={slider._id}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <img
+                    src={`${LocalhostAPI}${slider.image}`}
+                    alt={slider.title}
+                    className="h-48 w-full object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                    <h4 className="truncate text-lg font-medium">
+                      {slider.title}
+                    </h4>
+                  </div>
+                  <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      onClick={() => setDeleteId(slider._id)}
+                      className="rounded-lg bg-red-500/90 p-2 text-white transition hover:bg-red-600"
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           )}
         </AnimatePresence>
@@ -258,6 +272,7 @@ const TrashIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="h-5 w-5"
   >
     <path
       strokeLinecap="round"
