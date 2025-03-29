@@ -73,7 +73,7 @@ const Slider = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${LocalhostAPI}/sliders/${id}`);
+      await axios.delete(`${LocalhostAPI}sliders/${id}`);
       toast.success("Slider deleted successfully!");
       setDeleteId(null);
       fetchSliders();

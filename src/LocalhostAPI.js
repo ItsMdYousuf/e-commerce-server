@@ -1,2 +1,2 @@
-export const LocalhostAPI = "https://ecommerce-backend-sand-eight.vercel.app";
+export const LocalhostAPI = "https://e-commerce-server-pink.vercel.app";
 // export const LocalhostAPI = "http://localhost:5000";
