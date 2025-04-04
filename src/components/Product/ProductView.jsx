@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { LocalhostAPI } from "../../LocalhostAPI";
+
 const ProductView = () => {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
@@ -10,7 +11,7 @@ const ProductView = () => {
     fetch(`${LocalhostAPI}/products/${productId}`)
       .then((res) => res.json())
       .then((data) => {
-        // If variants is a string, try to parse it into an array.
+        // Parse variants if it's a string
         if (data.variants && typeof data.variants === "string") {
           try {
             data.variants = JSON.parse(data.variants);
@@ -19,9 +20,20 @@ const ProductView = () => {
             data.variants = [];
           }
         }
+
+        // Parse dimensions if it's a string
+        if (data.dimensions && typeof data.dimensions === "string") {
+          try {
+            data.dimensions = JSON.parse(data.dimensions);
+          } catch (error) {
+            console.error("Error parsing dimensions:", error);
+            data.dimensions = {};
+          }
+        }
+
         setProduct(data);
         if (data.variants && data.variants.length > 0) {
-          setSelectedVariant(data.variants[0]); // Set first variant as default
+          setSelectedVariant(data.variants[0]);
         }
       })
       .catch((error) => {
@@ -100,10 +112,30 @@ const ProductView = () => {
             <p>
               <span className="font-semibold">Weight:</span> {product.weight}
             </p>
-            <p>
-              <span className="font-semibold">Dimensions:</span>{" "}
-              {product.dimensions}
-            </p>
+
+            {/* Dimensions Table */}
+            {product.dimensions && typeof product.dimensions === "object" && (
+              <div>
+                <h3 className="font-semibold">Dimensions:</h3>
+                <table className="mt-2 min-w-[200px] table-auto border border-gray-300 text-sm">
+                  <thead className="table-auto">
+                    <tr className="bg-slate-200">
+                      <th className="border px-4 py-2 text-left">Property</th>
+                      <th className="border px-4 py-2 text-left">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody className="table-auto">
+                    {Object.entries(product.dimensions).map(([key, value]) => (
+                      <tr key={key}>
+                        <td className="border px-4 py-2 capitalize">{key}</td>
+                        <td className="border px-4 py-2">{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
             <p>
               <span className="font-semibold">Warranty:</span>{" "}
               {product.warrantyInfo}
