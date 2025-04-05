@@ -248,7 +248,7 @@ const ManageProducts = () => {
                 <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
+                <th className="px-14 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
                   Stock
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-500 md:text-xs">
@@ -317,7 +317,7 @@ const ManageProducts = () => {
                     <td className="px-6 py-4">${product.productAmount}</td>
                     <td className="px-6 py-4">
                       <span
-                        className={`rounded-full px-2 py-1 text-sm ${
+                        className={`rounded-full px-2 py-1 text-xs ${
                           product.stockQuantity > 0
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
