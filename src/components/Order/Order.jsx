@@ -12,10 +12,7 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
-
-// API endpoint (ensure your backend server is running and accessible)
-const API_URL = "https://ecommerce-backend-sand-eight.vercel.app/orders"; // Replace if your API is hosted elsewhere
-
+// import { LocalhostAPI } from "../../LocalhostAPI";
 // Helper function to format date (adjust format as needed)
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -82,6 +79,8 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const LocalhostAPI = "http://localhost:5000/orders";
+
 // Main Order Management Component
 function Order() {
   // State variables
@@ -104,7 +103,7 @@ function Order() {
 
     try {
       // Construct the URL with the page query parameter
-      const url = `${API_URL}?page=${page}`;
+      const url = `${LocalhostAPI}?page=${page}`;
       const response = await fetch(url);
 
       // Check if the response is successful
@@ -135,12 +134,12 @@ function Order() {
     } catch (err) {
       console.error("Failed to fetch orders:", err); // Log the detailed error
       setError(
-        `Failed to fetch orders. Please ensure the API server at ${API_URL} is running and accessible. Error: ${err.message}`,
+        `Failed to fetch orders. Please ensure the API server at ${LocalhostAPI} is running and accessible. Error: ${err.message}`,
       );
     } finally {
       setLoading(false); // Set loading to false regardless of success or failure
     }
-  }, []); // No dependencies needed if API_URL is constant
+  }, []); // No dependencies needed if LocalhostAPI is constant
 
   // Fetch orders on initial component mount and when the page changes
   useEffect(() => {
@@ -162,7 +161,7 @@ function Order() {
     );
 
     try {
-      const response = await fetch(`${API_URL}/${orderId}`, {
+      const response = await fetch(`${LocalhostAPI}/${orderId}`, {
         // Assuming PUT/PATCH endpoint structure
         method: "PATCH", // Or 'PUT', depending on your API design
         headers: {
@@ -216,7 +215,7 @@ function Order() {
     }));
 
     try {
-      const response = await fetch(`${API_URL}/${orderId}`, {
+      const response = await fetch(`${LocalhostAPI}/${orderId}`, {
         // Assuming DELETE endpoint structure
         method: "DELETE",
       });
