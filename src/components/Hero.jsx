@@ -23,7 +23,7 @@ export default function LoginForm() {
     }
 
     // Check credentials (demo only - never do this in production!)
-    if (email === "admin" && password === "admin") {
+    if (email === "admin@gmail.com" && password === "admin") {
       setSuccess(true);
     } else {
       setError(
