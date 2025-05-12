@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { LocalhostAPI } from "../../LocalhostAPI";
+import { ApiContext } from "../Context/ApiProvider";
 
 const SingleBlog = () => {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
   const [error, setError] = useState("");
-
+  const { serverUrl } = useContext(ApiContext);
   useEffect(() => {
-    fetch(`${LocalhostAPI}/products/${postId}`)
+    fetch(`${serverUrl}/products/${postId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Post not found");
         return res.json();

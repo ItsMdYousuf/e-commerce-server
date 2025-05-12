@@ -1,7 +1,8 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { LocalhostAPI } from "../../LocalhostAPI";
+import React, { useContext, useEffect, useState } from "react";
+import { ApiContext } from "../Context/ApiProvider";
 const CategoryManager = () => {
+  const { serverUrl } = useContext(ApiContext);
   const [categories, setCategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState(null);
@@ -21,7 +22,7 @@ const CategoryManager = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${LocalhostAPI}/categories`);
+      const response = await axios.get(`${serverUrl}/categories`);
       setCategories(response.data);
     } catch (err) {
       setError("Failed to load categories");
@@ -35,16 +36,26 @@ const CategoryManager = () => {
     const data = new FormData();
     // Append all fields including empty values
     Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value || ""); // Handle empty strings
+      if (key === "name") {
+        const capitalizedValue = value
+          ? value.charAt(0).toUpperCase() + value.slice(1)
+          : "";
+        data.append(key, capitalizedValue);
+      } else if (key === "slug") {
+        const lowerCaseValue = value ? value.toLowerCase() : "";
+        data.append(key, lowerCaseValue);
+      } else {
+        data.append(key, value || "");
+      }
     });
 
     try {
       if (editData) {
-        await axios.put(`${LocalhostAPI}/categories/${editData._id}`, data, {
+        await axios.put(`${serverUrl}/categories/${editData._id}`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        await axios.post(`${LocalhostAPI}/categories`, data, {
+        await axios.post(`${serverUrl}/categories`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
@@ -65,7 +76,7 @@ const CategoryManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
-        await axios.delete(`${LocalhostAPI}/categories/${id}`);
+        await axios.delete(`${serverUrl}/categories/${id}`);
         fetchCategories();
       } catch (err) {
         setError("Deletion failed");
@@ -83,6 +94,12 @@ const CategoryManager = () => {
           onClick={() => {
             setEditData(null);
             setShowModal(true);
+            setFormData({
+              name: "",
+              slug: "",
+              description: "",
+              image: null,
+            });
           }}
           className="rounded-lg bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700"
         >
@@ -128,23 +145,23 @@ const CategoryManager = () => {
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                   <button
+                    className="mr-4 text-indigo-600 hover:text-indigo-900"
                     onClick={() => {
                       setEditData(category);
                       setFormData({
                         name: category.name,
                         slug: category.slug,
                         description: category.description,
-                        image: null,
+                        image: null, // Reset image for editing
                       });
                       setShowModal(true);
                     }}
-                    className="mr-4 text-indigo-600 hover:text-indigo-900"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(category._id)}
                     className="text-red-600 hover:text-red-900"
+                    onClick={() => handleDelete(category._id)}
                   >
                     Delete
                   </button>
@@ -182,7 +199,8 @@ const CategoryManager = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full rounded-md border px-3 py-2 capitalize focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-md border px-3 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter category name"
                 />
               </div>
 
@@ -197,7 +215,8 @@ const CategoryManager = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, slug: e.target.value })
                   }
-                  className="w-full rounded-md border px-3 py-2 lowercase focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-md border px-3 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter slug"
                 />
               </div>
 
@@ -212,6 +231,7 @@ const CategoryManager = () => {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   className="w-full rounded-md border px-3 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter description"
                 />
               </div>
 

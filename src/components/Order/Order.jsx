@@ -12,9 +12,8 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
-
-// API endpoint (ensure your backend server is running and accessible)
-const API_URL = "https://ecommerce-backend-sand-eight.vercel.app/orders"; // Replace if your API is hosted elsewhere
+import { useContext } from "react";
+import { ApiContext } from "../Context/ApiProvider";
 
 // Helper function to format date (adjust format as needed)
 const formatDate = (dateString) => {
@@ -76,7 +75,7 @@ const StatusBadge = ({ status }) => {
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${bgColor} ${textColor}`}
     >
       <Icon className="mr-1.5 h-4 w-4" />
-      {status.charAt(0).toUpperCase() + status.slice(1)}{" "}
+      {status.charAt(0).toUpperCase() + status.slice(1)}
       {/* Capitalize first letter */}
     </span>
   );
@@ -94,7 +93,9 @@ function Order() {
     total: 0,
   });
   const [selectedOrderId, setSelectedOrderId] = useState(null); // Tracks which order's action menu is open
-
+  const [expandedOrderId, setExpandedOrderId] = useState(null); // Track the expanded order
+  const { serverUrl } = useContext(ApiContext);
+  const LocalhostAPI = `${serverUrl}/orders`;
   // Callback function to fetch orders from the API
   const fetchOrders = useCallback(async (page = 1) => {
     setLoading(true);
@@ -104,7 +105,7 @@ function Order() {
 
     try {
       // Construct the URL with the page query parameter
-      const url = `${API_URL}?page=${page}`;
+      const url = `${LocalhostAPI}?page=${page}`;
       const response = await fetch(url);
 
       // Check if the response is successful
@@ -135,12 +136,12 @@ function Order() {
     } catch (err) {
       console.error("Failed to fetch orders:", err); // Log the detailed error
       setError(
-        `Failed to fetch orders. Please ensure the API server at ${API_URL} is running and accessible. Error: ${err.message}`,
+        `Failed to fetch orders. Please ensure the API server at ${LocalhostAPI} is running and accessible. Error: ${err.message}`,
       );
     } finally {
       setLoading(false); // Set loading to false regardless of success or failure
     }
-  }, []); // No dependencies needed if API_URL is constant
+  }, []); // No dependencies needed if LocalhostAPI is constant
 
   // Fetch orders on initial component mount and when the page changes
   useEffect(() => {
@@ -162,7 +163,7 @@ function Order() {
     );
 
     try {
-      const response = await fetch(`${API_URL}/${orderId}`, {
+      const response = await fetch(`${LocalhostAPI}/${orderId}`, {
         // Assuming PUT/PATCH endpoint structure
         method: "PATCH", // Or 'PUT', depending on your API design
         headers: {
@@ -216,7 +217,7 @@ function Order() {
     }));
 
     try {
-      const response = await fetch(`${API_URL}/${orderId}`, {
+      const response = await fetch(`${LocalhostAPI}/${orderId}`, {
         // Assuming DELETE endpoint structure
         method: "DELETE",
       });
@@ -258,6 +259,11 @@ function Order() {
   // Toggle the action dropdown menu for a specific order
   const toggleActions = (orderId) => {
     setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
+  };
+
+  // Function to toggle order expansion
+  const toggleOrderExpansion = (orderId) => {
+    setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
   };
 
   // Render the component UI
@@ -353,130 +359,242 @@ function Order() {
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {orders.map((order) => (
-                  <tr
-                    key={order._id}
-                    className="transition-colors hover:bg-gray-50"
-                  >
-                    <td
-                      className="truncate whitespace-nowrap px-4 py-4 text-sm font-medium text-gray-900"
-                      title={order._id}
+                  <React.Fragment key={order._id}>
+                    <tr
+                      className="cursor-pointer transition-colors hover:bg-gray-50"
+                      onClick={() => toggleOrderExpansion(order._id)}
                     >
-                      #{order._id.slice(-6)} {/* Show last 6 chars */}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
-                      <div className="font-medium">
-                        {order.customerInfo?.name || "N/A"}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {order.customerInfo?.email || ""}
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
-                      {formatDate(order.createdAt)}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-gray-600">
-                      {formatCurrency(order.total)}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-sm">
-                      <StatusBadge status={order.status} />
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-sm capitalize text-gray-600">
-                      {order.paymentStatus || "N/A"}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-600">
-                      {order.items?.length || 0} item(s)
-                      {/* Optional: Add a tooltip or modal to show item details */}
-                      {order.items && order.items.length > 0 && (
-                        <div
-                          className="max-w-[150px] truncate text-xs text-gray-500"
-                          title={order.items
-                            .map((item) => `${item.title} (x${item.quantity})`)
-                            .join(", ")}
-                        >
-                          {order.items.map((item) => item.title).join(", ")}
-                        </div>
-                      )}
-                    </td>
-                    <td className="relative whitespace-nowrap px-4 py-4 text-right text-sm font-medium">
-                      {/* Action Button - Toggles Dropdown */}
-                      <button
-                        onClick={() => toggleActions(order._id)}
-                        className="rounded-full p-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        aria-haspopup="true"
-                        aria-expanded={selectedOrderId === order._id}
-                        aria-label={`Actions for order ${order._id.slice(-6)}`}
+                      <td
+                        className="truncate whitespace-nowrap px-4 py-4 text-sm font-medium text-gray-900"
+                        title={order._id}
                       >
-                        <MoreVertical className="h-5 w-5" />
-                      </button>
-
-                      {/* Action Dropdown Menu */}
-                      {selectedOrderId === order._id && (
-                        <div
-                          className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                          role="menu"
-                          aria-orientation="vertical"
-                          aria-labelledby={`menu-button-${order._id}`} // Use a unique ID if needed
-                        >
-                          <div className="py-1" role="none">
-                            <p className="block px-4 py-2 text-xs text-gray-500">
-                              Change Status:
-                            </p>
-                            {/* Status Update Actions */}
-                            <button
-                              onClick={() =>
-                                handleUpdateStatus(order._id, "pending")
-                              }
-                              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
-                              role="menuitem"
-                              disabled={order.status === "pending"} // Disable if already this status
-                            >
-                              Mark as Pending
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleUpdateStatus(order._id, "processing")
-                              }
-                              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
-                              role="menuitem"
-                              disabled={order.status === "processing"}
-                            >
-                              Mark as Processing
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleUpdateStatus(order._id, "completed")
-                              }
-                              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
-                              role="menuitem"
-                              disabled={order.status === "completed"}
-                            >
-                              Mark as Completed
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleUpdateStatus(order._id, "cancelled")
-                              }
-                              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
-                              role="menuitem"
-                              disabled={order.status === "cancelled"}
-                            >
-                              Mark as Cancelled
-                            </button>
-                            <div className="my-1 border-t border-gray-100"></div>
-                            {/* Delete Action */}
-                            <button
-                              onClick={() => handleDeleteOrder(order._id)}
-                              className="flex w-full items-center px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 hover:text-red-800"
-                              role="menuitem"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Order
-                            </button>
-                          </div>
+                        #{order._id.slice(-6)} {/* Show last 6 chars */}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
+                        <div className="font-medium">
+                          {order.customerInfo?.name || "N/A"}
                         </div>
-                      )}
-                    </td>
-                  </tr>
+                        <div className="text-xs text-gray-500">
+                          {order.customerInfo?.email || ""}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
+                        {formatDate(order.createdAt)}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-gray-600">
+                        {formatCurrency(order.total)}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm">
+                        <StatusBadge status={order.status} />
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm capitalize text-gray-600">
+                        {order.paymentStatus || "N/A"}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {order.items?.length || 0} item(s)
+                        {/* Optional: Add a tooltip or modal to show item details */}
+                        {order.items && order.items.length > 0 && (
+                          <div
+                            className="max-w-[150px] truncate text-xs text-gray-500"
+                            title={order.items
+                              .map(
+                                (item) => `${item.title} (x${item.quantity})`,
+                              )
+                              .join(", ")}
+                          >
+                            {order.items.map((item) => item.title).join(", ")}
+                          </div>
+                        )}
+                      </td>
+                      <td className="relative whitespace-nowrap px-4 py-4 text-right text-sm font-medium">
+                        {/* Action Button - Toggles Dropdown */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row expansion
+                            toggleActions(order._id);
+                          }}
+                          className="rounded-full p-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          aria-haspopup="true"
+                          aria-expanded={selectedOrderId === order._id}
+                          aria-label={`Actions for order ${order._id.slice(-6)}`}
+                        >
+                          <MoreVertical className="h-5 w-5" />
+                        </button>
+
+                        {/* Action Dropdown Menu */}
+                        {selectedOrderId === order._id && (
+                          <div
+                            className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                            role="menu"
+                            aria-orientation="vertical"
+                            aria-labelledby={`menu-button-${order._id}`} // Use a unique ID if needed
+                          >
+                            <div className="py-1" role="none">
+                              <p className="block px-4 py-2 text-xs text-gray-500">
+                                Change Status:
+                              </p>
+                              {/* Status Update Actions */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent row expansion
+                                  handleUpdateStatus(order._id, "pending");
+                                }}
+                                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                                role="menuitem"
+                                disabled={order.status === "pending"} // Disable if already this status
+                              >
+                                Mark as Pending
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent row expansion
+                                  handleUpdateStatus(order._id, "processing");
+                                }}
+                                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                                role="menuitem"
+                                disabled={order.status === "processing"}
+                              >
+                                Mark as Processing
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent row expansion
+                                  handleUpdateStatus(order._id, "completed");
+                                }}
+                                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                                role="menuitem"
+                                disabled={order.status === "completed"}
+                              >
+                                Mark as Completed
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent row expansion
+                                  handleUpdateStatus(order._id, "cancelled");
+                                }}
+                                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                                role="menuitem"
+                                disabled={order.status === "cancelled"}
+                              >
+                                Mark as Cancelled
+                              </button>
+                              <div className="my-1 border-t border-gray-100"></div>
+                              {/* Delete Action */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent row expansion
+                                  handleDeleteOrder(order._id);
+                                }}
+                                className="flex w-full items-center px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 hover:text-red-800"
+                                role="menuitem"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Order
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                    {/* Expanded Order Details */}
+                    {expandedOrderId === order._id && (
+                      <tr>
+                        <td colSpan={8} className="bg-gray-50 px-4 py-4">
+                          <div className="rounded-md border border-gray-200 p-4">
+                            <h3 className="mb-2 text-lg font-semibold text-gray-800">
+                              Order Details - #{order._id.slice(-6)}
+                            </h3>
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                              <div>
+                                <p className="text-sm font-medium text-gray-600">
+                                  Customer Name:
+                                  <span className="ml-1 font-normal text-gray-900">
+                                    {order.customerInfo?.name || "N/A"}
+                                  </span>
+                                </p>
+                                <p className="text-sm font-medium text-gray-600">
+                                  Customer Email:
+                                  <span className="ml-1 font-normal text-gray-900">
+                                    {order.customerInfo?.email || "N/A"}
+                                  </span>
+                                </p>
+                                <p className="text-sm font-medium text-gray-600">
+                                  Shipping Address:
+                                  <span className="ml-1 font-normal text-gray-900">
+                                    {order.customerInfo.address || "N/A"}
+                                  </span>
+                                </p>
+                                <p className="text-sm font-medium text-gray-600">
+                                  Order Date:
+                                  <span className="ml-1 font-normal text-gray-900">
+                                    {formatDate(order.createdAt)}
+                                  </span>
+                                </p>
+                                <p className="text-sm font-medium text-gray-600">
+                                  Order Status:
+                                  <span className="ml-1 font-normal text-gray-900">
+                                    <StatusBadge status={order.status} />
+                                  </span>
+                                </p>
+                                <p className="text-sm font-medium text-gray-600">
+                                  Payment Status:
+                                  <span className="ml-1 font-normal capitalize text-gray-900">
+                                    {order.paymentStatus || "N/A"}
+                                  </span>
+                                </p>
+                                <p className="text-sm font-medium text-gray-600">
+                                  Payment Method:
+                                  <span className="ml-1 font-normal text-gray-900">
+                                    {order.paymentMethod || "N/A"}
+                                  </span>
+                                </p>
+                              </div>
+                              <div>
+                                <h4 className="text-md mb-2 font-semibold text-gray-700">
+                                  Order Items:
+                                </h4>
+                                {order.items && order.items.length > 0 ? (
+                                  <ul className="space-y-2">
+                                    {order.items.map((item, index) => (
+                                      <li
+                                        key={index}
+                                        className="rounded-md border border-gray-200 bg-white p-2"
+                                      >
+                                        <div className="flex items-center justify-between">
+                                          <div>
+                                            <p className="text-sm font-medium text-gray-900">
+                                              {item.title}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                              Quantity: {item.quantity}
+                                            </p>
+                                          </div>
+                                          <p className="text-sm font-semibold text-gray-900">
+                                            {formatCurrency(
+                                              item.price * item.quantity,
+                                            )}
+                                          </p>
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-sm text-gray-500">
+                                    No items in this order.
+                                  </p>
+                                )}
+                                <div className="mt-4 flex justify-end">
+                                  <p className="text-md font-bold text-gray-900">
+                                    Order Total: {formatCurrency(order.total)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

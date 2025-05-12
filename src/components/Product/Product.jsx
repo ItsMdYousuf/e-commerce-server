@@ -1,14 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { LocalhostAPI } from "../../LocalhostAPI";
+import { ApiContext } from "../Context/ApiProvider";
+
 const Product = () => {
   const quillRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
-
+  const { serverUrl } = useContext(ApiContext);
   const [productFormData, setProductFormData] = useState({
     productTitle: "",
     productAmount: "",
@@ -56,37 +57,46 @@ const Product = () => {
   const [imageFile, setImageFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [currentTag, setCurrentTag] = useState("");
-  const [showTemplates, setShowTemplates] = useState(false);
 
-  const descriptionTemplates = [
-    {
-      name: "Basic Template",
-      content:
-        "High-quality product with durable construction. Perfect for everyday use. Features include: [list features here].",
-    },
-    {
-      name: "Premium Template",
-      content:
-        "Luxury product crafted with premium materials. Includes: [special features]. Comes with full warranty and premium packaging.",
-    },
-  ];
-
+  // Categories fetching
   useEffect(() => {
-    fetch(`${LocalhostAPI}/categories`)
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
-      .catch((error) => console.error("Error fetching categories:", error));
-  }, []);
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${serverUrl}/categories`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch categories: ${response.status}`);
+        }
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast.error(`Error fetching categories: ${error.message}`);
+      }
+    };
+    fetchCategories();
+  }, [serverUrl]);
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
         toast.error("Please upload an image file");
+        setImageFile(null);
+        setPreviewImage(null);
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        toast.error("Image size must be less than 5MB");
+        setImageFile(null);
+        setPreviewImage(null);
         return;
       }
       setImageFile(file);
       setPreviewImage(URL.createObjectURL(file));
+    } else {
+      setImageFile(null);
+      setPreviewImage(null);
     }
   };
 
@@ -117,31 +127,53 @@ const Product = () => {
     setLoading(true);
     setError(null);
 
-    if (!productFormData.productTitle || !productFormData.productAmount) {
-      setError("Please fill in all required fields");
+    if (
+      !productFormData.productTitle ||
+      !productFormData.productAmount ||
+      !productFormData.stockQuantity ||
+      !productFormData.productCategory
+    ) {
+      setError(
+        "Please fill in all required fields (Product Title, Price, Category and Stock Quantity)",
+      );
       setLoading(false);
       return;
     }
 
     const formData = new FormData();
     Object.entries(productFormData).forEach(([key, value]) => {
-      if (typeof value === "object") {
+      if (key === "dimensions") {
         formData.append(key, JSON.stringify(value));
+      } else if (key === "productTags") {
+        value.forEach((tag) => formData.append("productTags", tag));
       } else {
-        formData.append(key, value);
+        formData.append(key, value === undefined ? "" : value);
       }
     });
 
-    if (imageFile) formData.append("productImage", imageFile);
+    if (imageFile) {
+      formData.append("productImage", imageFile);
+    }
 
     try {
-      const response = await fetch(`${LocalhostAPI}/products`, {
+      const response = await fetch(`${serverUrl}/products`, {
         method: "POST",
         body: formData,
       });
 
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        let errorMessage = "Failed to add product";
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.message) {
+            errorMessage = errorData.message; // Use the message from the server response.
+          }
+        } catch (parseError) {
+          // If parsing JSON fails, fall back to generic error message
+          console.error("Error parsing error response:", parseError);
+        }
+        throw new Error(`${errorMessage} (HTTP status: ${response.status})`);
+      }
 
       const result = await response.json();
       toast.success("Product added successfully!");
@@ -154,11 +186,15 @@ const Product = () => {
         productTags: [],
         sku: "",
         dimensions: { length: "", width: "", height: "" },
+        stockQuantity: "",
       });
       setImageFile(null);
       setPreviewImage(null);
+      if (quillRef.current) {
+        quillRef.current.getEditor().setContents("");
+      }
     } catch (error) {
-      toast.error("Failed to add product!");
+      toast.error(`Failed to add product: ${error.message}`);
       console.error("Submission error:", error);
       setError(error.message);
     } finally {
@@ -179,7 +215,7 @@ const Product = () => {
               <img
                 src={previewImage}
                 alt="Preview"
-                className="mb-4 h-64 w-full object-contain"
+                className="mb-4 h-64 w-full rounded-md object-contain"
               />
             ) : (
               <div className="mb-4 flex h-64 items-center justify-center rounded-lg bg-gray-100">
@@ -208,10 +244,6 @@ const Product = () => {
             <h4 className="font-medium">
               {productFormData.productTitle || "Product Title"}
             </h4>
-            {/* <p className="text-gray-600">
-              {productFormData.productDescription ||
-                "Product description will appear here"}
-            </p> */}
             <div className="text-xl font-bold">
               ${productFormData.productAmount || "0.00"}
             </div>
@@ -274,7 +306,7 @@ const Product = () => {
                   className="h-32"
                   ref={quillRef}
                   theme="snow"
-                  value={productFormData.productDescription}
+                  value={productFormData.productDescription || ""}
                   onChange={(value) =>
                     setProductFormData({
                       ...productFormData,
@@ -379,7 +411,7 @@ const Product = () => {
               >
                 <option value="">Select Category</option>
                 {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
+                  <option key={category._id} value={category.name}>
                     {category.name}
                   </option>
                 ))}
@@ -431,7 +463,7 @@ const Product = () => {
               <input
                 type="number"
                 step="0.1"
-                value={productFormData.weight}
+                value={productFormData.weight || ""}
                 onChange={(e) =>
                   setProductFormData({
                     ...productFormData,
@@ -450,7 +482,7 @@ const Product = () => {
                 <input
                   type="number"
                   placeholder="Length"
-                  value={productFormData.dimensions.length}
+                  value={productFormData.dimensions.length || ""}
                   onChange={(e) =>
                     setProductFormData({
                       ...productFormData,
@@ -465,7 +497,7 @@ const Product = () => {
                 <input
                   type="number"
                   placeholder="Width"
-                  value={productFormData.dimensions.width}
+                  value={productFormData.dimensions.width || ""}
                   onChange={(e) =>
                     setProductFormData({
                       ...productFormData,
@@ -480,7 +512,7 @@ const Product = () => {
                 <input
                   type="number"
                   placeholder="Height"
-                  value={productFormData.dimensions.height}
+                  value={productFormData.dimensions.height || ""}
                   onChange={(e) =>
                     setProductFormData({
                       ...productFormData,
@@ -501,7 +533,7 @@ const Product = () => {
               </label>
               <input
                 type="text"
-                value={productFormData.warrantyInfo}
+                value={productFormData.warrantyInfo || ""}
                 onChange={(e) =>
                   setProductFormData({
                     ...productFormData,
