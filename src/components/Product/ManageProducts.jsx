@@ -36,7 +36,6 @@ const ManageProducts = () => {
       console.error("Error fetching products:", err);
     }
   };
-  console.log(`${serverUrl}/products`);
   // Fetch categories from the API
   useEffect(() => {
     fetch(serverUrl + "/categories")
@@ -263,8 +262,6 @@ const ManageProducts = () => {
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {currentProducts.map((product) => {
-                console.log("check product:::", product);
-
                 const productStatus = product.status || "published";
                 return (
                   <tr key={product._id} className="hover:bg-gray-50">

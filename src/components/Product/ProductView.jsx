@@ -1,6 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ApiContext } from "../Context/ApiProvider";
+import LoadingSpinner from "../LoadingSpinner";
 
 const ProductView = () => {
   const { productId } = useParams();
@@ -42,7 +43,12 @@ const ProductView = () => {
       });
   }, [productId]);
 
-  if (!product) return <div className="py-10 text-center">Loading...</div>;
+  if (!product)
+    return (
+      <div className="py-10 text-center">
+        <LoadingSpinner />{" "}
+      </div>
+    );
 
   const handleVariantChange = (variant) => {
     setSelectedVariant(variant);
