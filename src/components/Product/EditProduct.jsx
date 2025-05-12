@@ -1,11 +1,13 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { LocalhostAPI } from "../../LocalhostAPI";
+import { ApiContext } from "../Context/ApiProvider";
 
 const EditProduct = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  // constext api
+  const { serverUrl } = useContext(ApiContext);
   const [product, setProduct] = useState({
     productTitle: "",
     sku: "",
@@ -20,7 +22,7 @@ const EditProduct = () => {
   // Fetch the product details when the component mounts
   useEffect(() => {
     axios
-      .get(`${LocalhostAPI}/products/${productId}`)
+      .get(`${serverUrl}/products/${productId}`)
       .then((response) => {
         if (response.data && response.data.data) {
           setProduct(response.data.data);
@@ -44,7 +46,7 @@ const EditProduct = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .put(`${LocalhostAPI}/products/${productId}`, product)
+      .put(`${serverUrl}/products/${productId}`, product)
       .then((response) => {
         // Optionally, check the response for success
         navigate("/dashboard/products/manageProducts");

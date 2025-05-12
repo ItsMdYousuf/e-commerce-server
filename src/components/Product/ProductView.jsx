@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { LocalhostAPI } from "../../LocalhostAPI";
+import { ApiContext } from "../Context/ApiProvider";
 
 const ProductView = () => {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
-
+  const { serverUrl } = useContext(ApiContext);
   useEffect(() => {
-    fetch(`${LocalhostAPI}/products/${productId}`)
+    fetch(`${serverUrl}/products/${productId}`)
       .then((res) => res.json())
       .then((data) => {
         // Parse variants if it's a string
@@ -54,7 +54,7 @@ const ProductView = () => {
         {/* Product Image */}
         <div className="flex justify-center">
           <img
-            src={`${LocalhostAPI}${product.image}`}
+            src={`${serverUrl}${product.image}`}
             alt={product.productTitle}
             className="w-full max-w-md rounded-lg object-cover shadow-lg"
           />

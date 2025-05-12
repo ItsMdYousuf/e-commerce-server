@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   FiCopy,
   FiEdit,
@@ -10,7 +10,7 @@ import {
 import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { LocalhostAPI } from "../../LocalhostAPI";
+import { ApiContext } from "../Context/ApiProvider";
 
 const ManageProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,8 +21,7 @@ const ManageProducts = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 10;
   const [products, setProducts] = useState([]);
-  const productsData = LocalhostAPI + "/products";
-
+  const { serverUrl } = useContext(ApiContext);
   useEffect(() => {
     fetchProducts();
     // eslint-disable-next-line
@@ -30,17 +29,17 @@ const ManageProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(productsData);
+      const res = await fetch(`${serverUrl}/products`);
       const data = await res.json();
       setProducts(data);
     } catch (err) {
       console.error("Error fetching products:", err);
     }
   };
-
+  console.log(`${serverUrl}/products`);
   // Fetch categories from the API
   useEffect(() => {
-    fetch(LocalhostAPI + "/categories")
+    fetch(serverUrl + "/categories")
       .then((res) => res.json())
       .then((data) => {
         setCategoriesData(data);
@@ -57,7 +56,7 @@ const ManageProducts = () => {
   const handleDelete = async (_id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        const response = await fetch(`${productsData}/${_id}`, {
+        const response = await fetch(`${serverUrl}/products/${_id}`, {
           method: "DELETE",
         });
         if (response.ok) {
@@ -81,7 +80,7 @@ const ManageProducts = () => {
         try {
           await Promise.all(
             selectedProducts.map((id) =>
-              fetch(`${productsData}/${id}`, { method: "DELETE" }),
+              fetch(`${serverUrl}/${id}`, { method: "DELETE" }),
             ),
           );
           setProducts(
@@ -264,6 +263,8 @@ const ManageProducts = () => {
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {currentProducts.map((product) => {
+                console.log("check product:::", product);
+
                 const productStatus = product.status || "published";
                 return (
                   <tr key={product._id} className="hover:bg-gray-50">
@@ -290,7 +291,7 @@ const ManageProducts = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <img
-                          src={LocalhostAPI + product.image}
+                          src={serverUrl + product.image}
                           alt={product.productTitle}
                           className="mr-4 h-10 w-10 rounded-md object-cover"
                         />

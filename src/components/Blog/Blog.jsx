@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { LocalhostAPI } from "../../LocalhostAPI";
+import { ApiContext } from "../Context/ApiProvider";
 
 const Blog = () => {
   const [blog, setBlog] = useState([]);
-
+  const { serverUrl } = useContext(ApiContext);
   useEffect(() => {
-    fetch(LocalhostAPI + "/products")
+    fetch(serverUrl + "/products")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch");
         return res.json();
@@ -18,6 +18,9 @@ const Blog = () => {
   return (
     <div className="p-4">
       <h2 className="mb-4 text-2xl font-bold">Blog Posts</h2>
+      <div>
+        <p>here are url: {serverUrl}</p>
+      </div>
       <div className="space-y-4">
         {blog.map((item) => (
           <div className="rounded-lg border p-4" key={item.id}>

@@ -1,8 +1,8 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { LocalhostAPI } from "../../LocalhostAPI";
-
+import React, { useContext, useEffect, useState } from "react";
+import { ApiContext } from "../Context/ApiProvider";
 const CategoryManager = () => {
+  const { serverUrl } = useContext(ApiContext);
   const [categories, setCategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState(null);
@@ -22,7 +22,7 @@ const CategoryManager = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${LocalhostAPI}/categories`);
+      const response = await axios.get(`${serverUrl}/categories`);
       setCategories(response.data);
     } catch (err) {
       setError("Failed to load categories");
@@ -51,11 +51,11 @@ const CategoryManager = () => {
 
     try {
       if (editData) {
-        await axios.put(`${LocalhostAPI}/categories/${editData._id}`, data, {
+        await axios.put(`${serverUrl}/categories/${editData._id}`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        await axios.post(`${LocalhostAPI}/categories`, data, {
+        await axios.post(`${serverUrl}/categories`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
@@ -76,7 +76,7 @@ const CategoryManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
-        await axios.delete(`${LocalhostAPI}/categories/${id}`);
+        await axios.delete(`${serverUrl}/categories/${id}`);
         fetchCategories();
       } catch (err) {
         setError("Deletion failed");

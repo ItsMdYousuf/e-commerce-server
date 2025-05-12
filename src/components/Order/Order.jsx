@@ -12,6 +12,8 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
+import { useContext } from "react";
+import { ApiContext } from "../Context/ApiProvider";
 
 // Helper function to format date (adjust format as needed)
 const formatDate = (dateString) => {
@@ -73,13 +75,11 @@ const StatusBadge = ({ status }) => {
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${bgColor} ${textColor}`}
     >
       <Icon className="mr-1.5 h-4 w-4" />
-      {status.charAt(0).toUpperCase() + status.slice(1)}{" "}
+      {status.charAt(0).toUpperCase() + status.slice(1)}
       {/* Capitalize first letter */}
     </span>
   );
 };
-
-const LocalhostAPI = "http://localhost:5000/orders";
 
 // Main Order Management Component
 function Order() {
@@ -94,7 +94,8 @@ function Order() {
   });
   const [selectedOrderId, setSelectedOrderId] = useState(null); // Tracks which order's action menu is open
   const [expandedOrderId, setExpandedOrderId] = useState(null); // Track the expanded order
-
+  const { serverUrl } = useContext(ApiContext);
+  const LocalhostAPI = `${serverUrl}/orders`;
   // Callback function to fetch orders from the API
   const fetchOrders = useCallback(async (page = 1) => {
     setLoading(true);
