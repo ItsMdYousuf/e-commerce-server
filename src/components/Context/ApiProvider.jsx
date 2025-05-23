@@ -8,9 +8,11 @@ function ApiProvider({ children }) {
   useEffect(() => {
     const checkLocalhost = async () => {
       try {
-        const response = await fetch("http://localhost:5000");
+        const response = await fetch(
+          "https://ecommerce-backend-sand-eight.vercel.app",
+        );
         if (response.ok && response) {
-          setServerUrl("http://localhost:5000");
+          setServerUrl("https://ecommerce-backend-sand-eight.vercel.app");
         } else {
           setServerUrl("https://ecommerce-backend-sand-eight.vercel.app");
         }

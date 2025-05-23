@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react"; // Using Lucide React for icons
+import { Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -29,12 +29,15 @@ const Slider = () => {
     try {
       const response = await fetch(`${serverUrl}/sliders`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(
+          `Failed to fetch sliders: ${response.status} ${response.statusText}`,
+        );
       }
       const data = await response.json();
       setSliders(data);
     } catch (error) {
-      toast.error("Failed to fetch sliders: " + error.message);
+      toast.error(error.message); // Show error from fetch
+      console.error("Fetch Sliders Error:", error); // Log for detailed debugging
     }
   };
 
@@ -51,8 +54,14 @@ const Slider = () => {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!sliderImage) return toast.error("Please select an image");
-    if (!title) return toast.error("Please provide a title");
+    if (!sliderImage) {
+      toast.error("Please select an image");
+      return; // Stop upload
+    }
+    if (!title) {
+      toast.error("Please provide a title");
+      return; // Stop upload
+    }
 
     setIsLoading(true);
     const formData = new FormData();
@@ -65,20 +74,18 @@ const Slider = () => {
         body: formData,
       });
       if (!response.ok) {
-        // Attempt to get error message from JSON, if available
-        let errorMessage = "Upload failed";
+        let errorMessage = `Upload failed: ${response.status} ${response.statusText}`;
         try {
           const errorData = await response.json();
           if (errorData.error) {
-            errorMessage = errorData.error; // Use the server's error message
+            errorMessage = errorData.error;
           }
         } catch (jsonError) {
-          // If JSON parsing fails, use the raw status text
-          errorMessage = `Upload failed: ${response.status} - ${response.statusText}`;
+          console.error("JSON Parse Error:", jsonError);
         }
         throw new Error(errorMessage);
       }
-      const newSlider = await response.json(); // Parse JSON here
+      const newSlider = await response.json();
       toast.success("Slider uploaded successfully!");
       setTitle("");
       setSliderImage(null);
@@ -86,9 +93,10 @@ const Slider = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      setSliders((prevSliders) => [...prevSliders, newSlider]); // Update state
+      setSliders((prevSliders) => [...prevSliders, newSlider]);
     } catch (error) {
-      toast.error("Upload failed: " + error.message);
+      toast.error(error.message);
+      console.error("Upload Error:", error); // Log the error
     } finally {
       setIsLoading(false);
     }
@@ -100,25 +108,26 @@ const Slider = () => {
         method: "DELETE",
       });
       if (!response.ok) {
-        let errorMessage = "Delete failed";
+        let errorMessage = `Delete failed: ${response.status} ${response.statusText}`;
         try {
           const errorData = await response.json();
           if (errorData.error) {
             errorMessage = errorData.error;
           }
         } catch (jsonError) {
-          errorMessage = `Delete failed: ${response.status} - ${response.statusText}`;
+          console.error("JSON Parse Error:", jsonError);
         }
         throw new Error(errorMessage);
       }
-      await response.json(); // Ensure we parse the JSON, even if we don't use it
+      await response.json();
       toast.success("Slider deleted successfully!");
       setDeleteId(null);
       setSliders((prevSliders) =>
         prevSliders.filter((slider) => slider._id !== id),
       );
     } catch (error) {
-      toast.error("Delete failed: " + error.message);
+      toast.error(error.message);
+      console.error("Delete Error:", error); // Log the error
     }
   };
 
