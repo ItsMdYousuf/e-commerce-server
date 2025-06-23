@@ -8,6 +8,8 @@ import { useAuth } from "./components/Context/AuthContext";
 import Dashboard from "./components/Dashboard/Dashboard";
 import DashboardHome from "./components/Dashboard/DashboardHome";
 import Hero from "./components/Hero";
+import LoadingSpinner from "./components/LoadingSpinner";
+import Collection from "./components/NewImg";
 import Order from "./components/Order/Order";
 import PrivateRoute from "./components/PrivateRoute";
 import EditProduct from "./components/Product/EditProduct";
@@ -22,7 +24,7 @@ function App() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        Loading...
+        <LoadingSpinner />
       </div>
     );
   }
@@ -51,7 +53,7 @@ function App() {
           <Route path="category" element={<CategoryManager />} />
           <Route path="blogPost" element={<Blog />} />
           <Route path="blogPost/:postId" element={<SingleBlog />} />
-          <Route path="collection" element={<p>Collection Post</p>} />
+          <Route path="collection" element={<Collection />} />
           <Route path="message" element={<p>Message Post</p>} />
         </Route>
       </Route>
