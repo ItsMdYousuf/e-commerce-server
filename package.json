@@ -25,6 +25,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "firebase": "^11.7.3",
+    "framer-motion": "^12.26.2",
     "lucide-react": "^0.487.0",
     "mongodb": "^6.13.1",
     "prop-types": "^15.8.1",
