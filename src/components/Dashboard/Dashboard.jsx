@@ -1,161 +1,246 @@
-import React, { useState } from "react";
-import { BsCollection } from "react-icons/bs";
-import { CiCircleList } from "react-icons/ci";
-import { FiChevronDown, FiChevronUp, FiMenu } from "react-icons/fi";
-import { MdOutlineSpaceDashboard } from "react-icons/md";
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  RiBloggerLine,
-  RiMessage3Line,
-  RiProductHuntLine,
-} from "react-icons/ri";
-import { TbCategory2 } from "react-icons/tb";
-import { TfiLayoutSliderAlt } from "react-icons/tfi";
+  ChevronRight,
+  ExternalLink,
+  FileText,
+  LayoutDashboard,
+  Library,
+  ListOrdered,
+  Menu,
+  MessageSquare,
+  ShoppingBag,
+  Image as SliderIcon,
+  Tags,
+  X,
+} from "lucide-react";
+import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+
+// Components
 import Footer from "../Footer/Footer";
 import Header from "../Header/Header";
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false); // State for dropdown
+  const [openMenus, setOpenMenus] = useState({}); // Dynamic state for multiple dropdowns
   const location = useLocation();
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const toggleMenu = (name) => {
+    if (!isSidebarOpen) setIsSidebarOpen(true);
+    setOpenMenus((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
   };
 
-  const toggleProductDropdown = () => {
-    setIsProductDropdownOpen((prev) => !prev);
-  };
-
-  // Sidebar items
   const sidebarItems = [
     {
       name: "Dashboard",
-      icon: <MdOutlineSpaceDashboard />,
+      icon: <LayoutDashboard size={20} />,
       path: "/dashboard",
     },
     {
-      name: "Add Slider",
-      icon: <TfiLayoutSliderAlt />,
+      name: "Slider",
+      icon: <SliderIcon size={20} />,
       path: "/dashboard/slider",
     },
     {
       name: "Products",
-      icon: <RiProductHuntLine />,
+      icon: <ShoppingBag size={20} />,
       path: "/dashboard/products",
-      hasDropdown: true, // Indicates this item has a dropdown
+      hasDropdown: true,
       subItems: [
         { name: "Add New Product", path: "/dashboard/products/addNewProduct" },
         { name: "Manage Products", path: "/dashboard/products/manageProducts" },
       ],
     },
-
-    { name: "Order", icon: <CiCircleList />, path: "/dashboard/order" },
-    { name: "Category", icon: <TbCategory2 />, path: "/dashboard/category" },
-    { name: "Blog Post", icon: <RiBloggerLine />, path: "/dashboard/blogPost" },
+    {
+      name: "Orders",
+      icon: <ListOrdered size={20} />,
+      path: "/dashboard/order",
+    },
+    { name: "Category", icon: <Tags size={20} />, path: "/dashboard/category" },
+    {
+      name: "Blog Post",
+      icon: <FileText size={20} />,
+      path: "/dashboard/blogPost",
+    },
     {
       name: "Collection",
-      icon: <BsCollection />,
+      icon: <Library size={20} />,
       path: "/dashboard/collection",
     },
-    { name: "Message", icon: <RiMessage3Line />, path: "/dashboard/message" },
+    {
+      name: "Message",
+      icon: <MessageSquare size={20} />,
+      path: "/dashboard/message",
+    },
   ];
 
   return (
-    <div className="flex">
-      {/* Sidebar */}
-      <aside
-        className={`${
-          isSidebarOpen ? "w-[250px]" : "w-[60px]"
-        } flex h-screen flex-col bg-gray-50 transition-all duration-300 ease-in-out`}
+    <div className="flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+      {/* SIDEBAR */}
+      <motion.aside
+        initial={false}
+        animate={{ width: isSidebarOpen ? 280 : 80 }}
+        className="relative z-50 flex flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
       >
         {/* Sidebar Header */}
-        <div className="flex shrink-0 items-center justify-between border-b-2 border-purple-400 p-2">
+        <div className="flex h-16 items-center justify-between px-4">
+          <AnimatePresence transition={{ duration: 0.1 }}>
+            {isSidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex items-center gap-2"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                  <ShoppingBag size={18} />
+                </div>
+                <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">
+                  NexusStore
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <button
             onClick={toggleSidebar}
-            className="rounded-md bg-purple-500 p-2 text-white"
+            className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
-            <FiMenu className="text-xl" />
+            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-          {isSidebarOpen && (
-            <Link to="/">
-              <h1 className="text-md font-semibold">E-Commerce App</h1>
-            </Link>
-          )}
         </div>
 
-        {/* Scrollable Nav Items */}
-        <div className="flex-1 overflow-y-auto">
-          <div
-            className={`mt-3 flex flex-col gap-3 ${
-              !isSidebarOpen
-                ? "items-center justify-center"
-                : "justify-start px-5"
-            }`}
-          >
-            {sidebarItems.map((item) => (
-              <div key={item.path}>
-                {/* Main Item */}
-                <div
-                  onClick={item.hasDropdown ? toggleProductDropdown : undefined}
-                  className={`flex items-center justify-between gap-3 rounded-md px-2 py-2 ${
-                    location.pathname === item.path
-                      ? "bg-purple-500 text-white"
-                      : "text-gray-700 hover:bg-gray-200"
-                  } ${item.hasDropdown ? "cursor-pointer" : ""}`}
-                >
+        {/* Navigation Items */}
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          {sidebarItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const isMenuOpen = openMenus[item.name];
+
+            return (
+              <div key={item.name} className="mb-1">
+                {item.hasDropdown ? (
+                  <>
+                    <button
+                      onClick={() => toggleMenu(item.name)}
+                      className={`group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                        isMenuOpen
+                          ? "bg-zinc-50 text-indigo-600 dark:bg-zinc-800 dark:text-indigo-400"
+                          : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={
+                            isMenuOpen
+                              ? "text-indigo-600"
+                              : "text-zinc-400 group-hover:text-zinc-900"
+                          }
+                        >
+                          {item.icon}
+                        </span>
+                        {isSidebarOpen && <span>{item.name}</span>}
+                      </div>
+                      {isSidebarOpen && (
+                        <ChevronRight
+                          size={16}
+                          className={`transition-transform duration-200 ${isMenuOpen ? "rotate-90" : ""}`}
+                        />
+                      )}
+                    </button>
+
+                    <AnimatePresence>
+                      {isMenuOpen && isSidebarOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="ml-9 mt-1 space-y-1 border-l-2 border-zinc-100 py-1 dark:border-zinc-800">
+                            {item.subItems.map((sub) => (
+                              <Link
+                                key={sub.path}
+                                to={sub.path}
+                                className={`block px-4 py-2 text-xs font-medium transition-colors ${
+                                  location.pathname === sub.path
+                                    ? "text-indigo-600 dark:text-indigo-400"
+                                    : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
+                                }`}
+                              >
+                                {sub.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                ) : (
                   <Link
                     to={item.path}
-                    className="flex flex-1 items-center gap-3"
+                    className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                      isActive
+                        ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400"
+                        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+                    }`}
                   >
-                    {item.icon}
+                    <span
+                      className={
+                        isActive
+                          ? "text-indigo-600"
+                          : "text-zinc-400 group-hover:text-zinc-900"
+                      }
+                    >
+                      {item.icon}
+                    </span>
                     {isSidebarOpen && <span>{item.name}</span>}
                   </Link>
-
-                  {/* Dropdown Icon */}
-                  {item.hasDropdown && isSidebarOpen && (
-                    <span>
-                      {isProductDropdownOpen ? (
-                        <FiChevronUp />
-                      ) : (
-                        <FiChevronDown />
-                      )}
-                    </span>
-                  )}
-                </div>
-
-                {/* Dropdown Items */}
-                {item.hasDropdown && isProductDropdownOpen && isSidebarOpen && (
-                  <div className="ml-5 mt-2 flex flex-col gap-2">
-                    {item.subItems.map((subItem) => (
-                      <Link
-                        key={subItem.path}
-                        to={subItem.path}
-                        className={`flex items-center gap-3 rounded-md px-2 py-2 ${
-                          location.pathname === subItem.path
-                            ? "bg-purple-500 text-white"
-                            : "text-gray-700 hover:bg-gray-200"
-                        }`}
-                      >
-                        {isSidebarOpen && <span>{subItem.name}</span>}
-                      </Link>
-                    ))}
-                  </div>
                 )}
               </div>
-            ))}
-          </div>
-        </div>
-      </aside>
+            );
+          })}
+        </nav>
 
-      {/* Main Content */}
-      <main className="flex-1">
-        <Header />
-        <div className="min-h-screen bg-slate-100">
-          <Outlet />
+        {/* Sidebar Footer */}
+        <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
+          <Link
+            to="/"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          >
+            <ExternalLink size={18} />
+            {isSidebarOpen && <span>Live Preview</span>}
+          </Link>
         </div>
+      </motion.aside>
+
+      {/* MAIN CONTENT AREA */}
+      <div className="relative flex flex-1 flex-col overflow-y-auto">
+        <Header />
+
+        <main className="flex-1 p-6 lg:p-10">
+          <div className="mx-auto max-w-7xl">
+            {/* Breadcrumb or Page Header can go here */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold capitalize text-zinc-900 dark:text-white">
+                {location.pathname.split("/").pop() || "Dashboard"}
+              </h2>
+              <p className="text-sm text-zinc-500">
+                Manage your store activities and data.
+              </p>
+            </div>
+
+            <Outlet />
+          </div>
+        </main>
+
         <Footer />
-      </main>
+      </div>
     </div>
   );
 };
